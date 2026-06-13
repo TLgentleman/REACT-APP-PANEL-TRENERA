@@ -15,9 +15,16 @@ export default function Dashboard() {
     } else {
       setTrainer(activeUser);
 
+      // Pobieranie danych z JSON
       fetch("/clients.json")
         .then((response) => response.json())
-        .then((data) => setClients(data))
+        .then((data) => {
+          // Kiedy pobierzemy mocki, sprawdzamy czy mamy kogoś nowego w localStorage
+          const newClients =
+            JSON.parse(localStorage.getItem("newClients")) || [];
+          // Łączymy obie tablice w jedną listę
+          setClients([...data, ...newClients]);
+        })
         .catch((error) => console.error("Błąd pobierania danych:", error));
     }
   }, [navigate]);
@@ -32,17 +39,21 @@ export default function Dashboard() {
   return (
     <div className="container" style={{ maxWidth: "500px" }}>
       <h2>Zalogowany jako {trainer}</h2>
-      <button
-        onClick={handleLogout}
-        style={{
-          background: "#ef4444",
-          color: "white",
-          marginBottom: "2rem",
-          padding: "0.5rem",
-        }}
-      >
-        Wyloguj się
-      </button>
+
+      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
+        <button
+          onClick={() => navigate("/add-client")}
+          style={{ background: "#00f2fe", color: "#0f172a" }}
+        >
+          + Dodaj klienta
+        </button>
+        <button
+          onClick={handleLogout}
+          style={{ background: "#ef4444", color: "white" }}
+        >
+          Wyloguj się
+        </button>
+      </div>
 
       <div style={{ textAlign: "left" }}>
         <h3
@@ -56,7 +67,7 @@ export default function Dashboard() {
             <ClientCard key={client.id} client={client} />
           ))
         ) : (
-          <p>Pobieranie danych...</p>
+          <p>Brak klientów w bazie.</p>
         )}
       </div>
     </div>
