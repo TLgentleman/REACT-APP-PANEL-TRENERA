@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ClientCard from "./ClientCard";
-import RxSearch from "./RxSearch"; // <--- DODANY IMPORT
+import RxSearch from "./RxSearch";
 
 export default function Dashboard() {
   const [trainer, setTrainer] = useState("");
 
-  // Dwa osobne stany: jeden na wszystkich klientów z bazy, drugi na tych wyszukanych
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
 
@@ -27,8 +26,8 @@ export default function Dashboard() {
             JSON.parse(localStorage.getItem("newClients")) || [];
           const combinedList = [...data, ...newClients];
 
-          setClients(combinedList); // Zapisujemy wszystkich jako baza
-          setFilteredClients(combinedList); // Na start pokazujemy wszystkich
+          setClients(combinedList);
+          setFilteredClients(combinedList);
         })
         .catch((error) => console.error("Błąd pobierania danych:", error));
     }
@@ -41,7 +40,6 @@ export default function Dashboard() {
 
   if (!trainer) return null;
 
-  // Wymóg ograniczania widocznych elementów: ucinamy tablicę do maksymalnie 5 wyników
   const displayedClients = filteredClients.slice(0, 5);
 
   return (
@@ -70,7 +68,6 @@ export default function Dashboard() {
           Twoi Podopieczni:
         </h3>
 
-        {/* Nasza wyszukiwarka RxJS */}
         <RxSearch
           allClients={clients}
           setFilteredClients={setFilteredClients}
