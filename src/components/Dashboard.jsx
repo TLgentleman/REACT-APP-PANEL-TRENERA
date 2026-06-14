@@ -1,15 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ClientCard from "./ClientCard";
-import RxSearch from "./RxSearch"; // <--- DODANY IMPORT
 
 export default function Dashboard() {
   const [trainer, setTrainer] = useState("");
-
-  // Dwa osobne stany: jeden na wszystkich klientów z bazy, drugi na tych wyszukanych
   const [clients, setClients] = useState([]);
-  const [filteredClients, setFilteredClients] = useState([]);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,15 +15,15 @@ export default function Dashboard() {
     } else {
       setTrainer(activeUser);
 
+      // Pobieranie danych z JSON
       fetch("/clients.json")
         .then((response) => response.json())
         .then((data) => {
+          // Kiedy pobierzemy mocki, sprawdzamy czy mamy kogoś nowego w localStorage
           const newClients =
             JSON.parse(localStorage.getItem("newClients")) || [];
-          const combinedList = [...data, ...newClients];
-
-          setClients(combinedList); // Zapisujemy wszystkich jako baza
-          setFilteredClients(combinedList); // Na start pokazujemy wszystkich
+          // Łączymy obie tablice w jedną listę
+          setClients([...data, ...newClients]);
         })
         .catch((error) => console.error("Błąd pobierania danych:", error));
     }
@@ -40,9 +35,6 @@ export default function Dashboard() {
   };
 
   if (!trainer) return null;
-
-  // Wymóg ograniczania widocznych elementów: ucinamy tablicę do maksymalnie 5 wyników
-  const displayedClients = filteredClients.slice(0, 5);
 
   return (
     <div className="container" style={{ maxWidth: "500px" }}>
@@ -70,18 +62,12 @@ export default function Dashboard() {
           Twoi Podopieczni:
         </h3>
 
-        {/* Nasza wyszukiwarka RxJS */}
-        <RxSearch
-          allClients={clients}
-          setFilteredClients={setFilteredClients}
-        />
-
-        {displayedClients.length > 0 ? (
-          displayedClients.map((client) => (
+        {clients.length > 0 ? (
+          clients.map((client) => (
             <ClientCard key={client.id} client={client} />
           ))
         ) : (
-          <p>Brak wyników wyszukiwania.</p>
+          <p>Brak klientów w bazie.</p>
         )}
       </div>
     </div>
