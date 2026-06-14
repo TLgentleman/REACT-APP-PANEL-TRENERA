@@ -1,36 +1,42 @@
-import { useEffect, useRef } from "react";
-import { fromEvent, of } from "rxjs";
+import { useEffect, useMemo } from "react";
+import { Subject, of } from "rxjs";
 import { debounceTime, map, switchMap } from "rxjs/operators";
 
 export default function RxSearch({ allClients, setFilteredClients }) {
-  const inputRef = useRef(null);
+  const searchSubject = useMemo(() => new Subject(), []);
 
   useEffect(() => {
-    const searchStream$ = fromEvent(inputRef.current, "input").pipe(
-      debounceTime(300),
+    const subscription = searchSubject
+      .pipe(
+        debounceTime(300),
 
-      map((event) => event.target.value.toLowerCase()),
+        map((text) => text.toLowerCase().trim()),
 
-      switchMap((searchTerm) => {
-        const filtered = allClients.filter(
-          (client) =>
-            client.lastName.toLowerCase().includes(searchTerm) ||
-            client.firstName.toLowerCase().includes(searchTerm),
-        );
-        return of(filtered);
-      }),
-    );
-
-    const subscription = searchStream$.subscribe((result) => {});
+        switchMap((searchTerm) => {
+          const filtered = allClients.filter(
+            (client) =>
+              client.lastName.toLowerCase().includes(searchTerm) ||
+              client.firstName.toLowerCase().includes(searchTerm),
+          );
+          return of(filtered);
+        }),
+      )
+      .subscribe((result) => {
+        setFilteredClients(result);
+      });
 
     return () => subscription.unsubscribe();
-  }, [allClients, setFilteredClients]);
+  }, [allClients, setFilteredClients, searchSubject]);
+
+  const handleChange = (e) => {
+    searchSubject.next(e.target.value);
+  };
 
   return (
     <div className="input-group" style={{ marginBottom: "1rem" }}>
       <input
-        ref={inputRef}
         type="text"
+        onChange={handleChange}
         placeholder="Wyszukaj klienta po nazwisku lub imieniu..."
       />
     </div>

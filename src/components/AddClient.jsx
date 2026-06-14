@@ -12,8 +12,7 @@ export default function AddClient() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Podstawowa walidacja (wymóg z projektu)
-    if (!firstName || !lastName || !credits) {
+    if (!firstName.trim() || !lastName.trim() || !credits) {
       setError("Wszystkie pola są wymagane!");
       return;
     }
@@ -23,24 +22,20 @@ export default function AddClient() {
       return;
     }
 
-    // Tworzymy obiekt nowego klienta
     const newClient = {
-      id: Date.now(), // generujemy unikalne ID na podstawie czasu
+      id: Date.now(),
       firstName,
       lastName,
       creditsLeft: Number(credits),
     };
 
-    // Pobieramy dotychczasowych "nowych" klientów z localStorage
     const savedClients = JSON.parse(localStorage.getItem("newClients")) || [];
 
-    // Dodajemy nowego i zapisujemy
     localStorage.setItem(
       "newClients",
       JSON.stringify([...savedClients, newClient]),
     );
 
-    // Wracamy na stronę główną
     navigate("/");
   };
 

@@ -1,23 +1,20 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import ClientCard from "./ClientCard";
 import RxSearch from "./RxSearch";
 
 export default function Dashboard() {
   const [trainer, setTrainer] = useState("");
-
   const [clients, setClients] = useState([]);
+  const [filteredClients, setFilteredClients] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const activeUser = localStorage.getItem("loggedTrainer");
+  const activeUser = localStorage.getItem("loggedTrainer");
 
-    if (!activeUser) {
-      navigate("/login");
-    } else {
+  useEffect(() => {
+    if (activeUser) {
       setTrainer(activeUser);
 
-      // Pobieranie danych z JSON
       fetch("/clients.json")
         .then((response) => response.json())
         .then((data) => {
@@ -30,14 +27,16 @@ export default function Dashboard() {
         })
         .catch((error) => console.error("Błąd pobierania danych:", error));
     }
-  }, [navigate]);
+  }, [activeUser]);
 
   const handleLogout = () => {
     localStorage.removeItem("loggedTrainer");
     navigate("/login");
   };
 
-  if (!trainer) return null;
+  if (!activeUser) {
+    return <Navigate to="/login" replace />;
+  }
 
   const displayedClients = filteredClients.slice(0, 5);
 
@@ -77,7 +76,7 @@ export default function Dashboard() {
             <ClientCard key={client.id} client={client} />
           ))
         ) : (
-          <p>Brak klientów w bazie.</p>
+          <p>Brak wyników wyszukiwania.</p>
         )}
       </div>
     </div>
