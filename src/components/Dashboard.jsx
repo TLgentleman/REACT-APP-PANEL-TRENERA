@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ClientCard from "./ClientCard";
+import RxSearch from "./RxSearch";
 
 export default function Dashboard() {
   const [trainer, setTrainer] = useState("");
+
   const [clients, setClients] = useState([]);
   const navigate = useNavigate();
 
@@ -19,11 +21,12 @@ export default function Dashboard() {
       fetch("/clients.json")
         .then((response) => response.json())
         .then((data) => {
-          // Kiedy pobierzemy mocki, sprawdzamy czy mamy kogoś nowego w localStorage
           const newClients =
             JSON.parse(localStorage.getItem("newClients")) || [];
-          // Łączymy obie tablice w jedną listę
-          setClients([...data, ...newClients]);
+          const combinedList = [...data, ...newClients];
+
+          setClients(combinedList);
+          setFilteredClients(combinedList);
         })
         .catch((error) => console.error("Błąd pobierania danych:", error));
     }
@@ -35,6 +38,8 @@ export default function Dashboard() {
   };
 
   if (!trainer) return null;
+
+  const displayedClients = filteredClients.slice(0, 5);
 
   return (
     <div className="container" style={{ maxWidth: "500px" }}>
@@ -62,8 +67,13 @@ export default function Dashboard() {
           Twoi Podopieczni:
         </h3>
 
-        {clients.length > 0 ? (
-          clients.map((client) => (
+        <RxSearch
+          allClients={clients}
+          setFilteredClients={setFilteredClients}
+        />
+
+        {displayedClients.length > 0 ? (
+          displayedClients.map((client) => (
             <ClientCard key={client.id} client={client} />
           ))
         ) : (
